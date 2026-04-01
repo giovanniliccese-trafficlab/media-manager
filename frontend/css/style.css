@@ -1,0 +1,481 @@
+/* ========================================
+   Media Manager - Main Stylesheet
+   ======================================== */
+
+/* ===== General Utilities ===== */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.list-group-item-action:hover {
+    background-color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .list-group-item-action:hover {
+    background-color: #343a40;
+}
+
+/* ===== Sidebar Styles ===== */
+
+/* Sidebar close button (mobile only) */
+.sidebar-close-btn {
+    display: none;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6c757d;
+    cursor: pointer;
+    z-index: 1050;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    line-height: 1;
+}
+
+.sidebar-close-btn:hover {
+    color: #000;
+}
+
+[data-bs-theme="dark"] .sidebar-close-btn {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .sidebar-close-btn:hover {
+    color: #fff;
+}
+
+/* Desktop: sidebar sempre visibile, fixed a sinistra */
+@media (min-width: 768px) {
+    .sidebar {
+        display: block !important;
+        position: fixed;
+        top: 56px;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+}
+
+/* Mobile: sidebar nascosta di default, overlay su contenuto con altezza fissa */
+@media (max-width: 767px) {
+    .sidebar {
+        position: fixed;
+        top: 56px;
+        left: 0;
+        width: 250px;
+        height: calc(100vh - 56px); /* Altezza esplicita */
+        z-index: 1040;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        overflow-y: auto; /* Scroll interno se necessario */
+        overflow-x: hidden;
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .sidebar.collapsing {
+        transition: transform 0.3s ease-in-out;
+    }
+    
+    /* Mostra il pulsante X solo su mobile */
+    .sidebar-close-btn {
+        display: block;
+    }
+    
+    /* Main content occupa tutto lo spazio su mobile */
+    main.col-md-9 {
+        width: 100%;
+        margin-left: 0 !important;
+    }
+    
+    /* Backdrop quando sidebar aperta */
+    .sidebar-backdrop {
+        position: fixed;
+        top: 56px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 56px);
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1039;
+        display: none;
+    }
+    
+    .sidebar-backdrop.show {
+        display: block;
+    }
+}
+
+/* ===== Navbar Styles ===== */
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+/* ===== Sidebar Navigation ===== */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Container interno con flexbox per spingere server time in fondo */
+.sidebar .position-sticky {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 56px); /* Occupa sempre tutta l'altezza visibile */
+    padding: 1rem 0;
+}
+
+@media (max-width: 767px) {
+    .sidebar .position-sticky {
+        padding-top: 3.5rem; /* Spazio per il pulsante X */
+        min-height: calc(100vh - 56px); /* Garantisce altezza minima su mobile */
+    }
+}
+
+.sidebar .nav {
+    flex: 1 1 auto; /* Occupa lo spazio disponibile */
+}
+
+.sidebar .nav-link {
+    color: #333;
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #f8f9fa;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.sidebar .nav-link i {
+    width: 20px;
+}
+
+/* Dark mode - sidebar links */
+[data-bs-theme="dark"] .sidebar .nav-link {
+    color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .sidebar .nav-link:hover {
+    background-color: #343a40;
+}
+
+[data-bs-theme="dark"] .sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* ===== Server Time Display ===== */
+.sidebar .border-top {
+    border-top: 1px solid #dee2e6 !important;
+    flex: 0 0 auto; /* Non si espande, rimane della sua dimensione */
+    padding: 0.75rem 0;
+    margin-top: auto; /* Spinge sempre in fondo */
+}
+
+[data-bs-theme="dark"] .sidebar .border-top {
+    border-top-color: #495057 !important;
+}
+
+#sidebar-datetime {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+#sidebar-timezone {
+    font-size: 0.75rem;
+}
+
+/* ===== Main Content ===== */
+main {
+    padding-top: 20px;
+    padding-bottom: 40px;
+    min-height: calc(100vh - 56px);
+}
+
+.btn-danger {
+	border-top-left-radius: var(--bs-border-radius-sm) !important;
+	border-bottom-left-radius: var(--bs-border-radius-sm) !important;
+}
+
+@media (min-width: 768px) {
+    /* Assicura che il main non vada sotto la sidebar */
+    main.col-md-9,
+    main.col-lg-10 {
+        margin-left: auto !important;
+    }
+}
+
+/* ===== Cards ===== */
+.card {
+    border-radius: 0.375rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+[data-bs-theme="dark"] .card-header {
+    background-color: #212529;
+    border-bottom-color: #495057;
+}
+
+/* ===== Progress Bars ===== */
+.progress {
+    border-radius: 0.375rem;
+}
+
+/* ===== Toast Notifications ===== */
+.toast-container {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 9999;
+}
+
+/* ===== Modal Improvements ===== */
+.modal-header {
+    background-color: #f8f9fa;
+}
+
+.modal-footer {
+    background-color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-footer {
+    background-color: #212529;
+}
+
+/* ===== Forms ===== */
+.form-control:focus,
+.form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* ===== Badges ===== */
+.badge {
+    font-weight: 500;
+}
+
+/* Dark mode badge fixes */
+[data-bs-theme="dark"] .badge {
+    color: #fff !important;
+}
+
+[data-bs-theme="dark"] .badge.bg-warning,
+[data-bs-theme="dark"] .badge.text-dark {
+    color: #000 !important;
+}
+
+/* ===== Task Card Colors ===== */
+/* Running state - Yellow */
+.card-header.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+[data-bs-theme="dark"] .card-header.bg-warning {
+    background-color: #ffca2c !important;
+    color: #000 !important;
+}
+
+/* Completed state - Green */
+.card-header.bg-success {
+    background-color: #198754 !important;
+    color: #fff !important;
+}
+
+[data-bs-theme="dark"] .card-header.bg-success {
+    background-color: #198754 !important;
+    color: #fff !important;
+}
+
+/* Error state - Red */
+.card-header.bg-danger {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+}
+
+/* Stopped state - Gray */
+.card-header.bg-secondary {
+    background-color: #6c757d !important;
+    color: #fff !important;
+}
+
+[data-bs-theme="dark"] .card-header.bg-secondary {
+    background-color: #495057 !important;
+}
+
+/* ===== Log Badges Dark Mode ===== */
+[data-bs-theme="dark"] .list-group-item {
+    background-color: #212529;
+    border-color: #495057;
+    color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .list-group-item:hover {
+    background-color: #2c3034;
+}
+
+[data-bs-theme="dark"] .btn-check:checked + .btn-outline-primary,
+[data-bs-theme="dark"] .btn-check:checked + .btn-outline-success,
+[data-bs-theme="dark"] .btn-check:checked + .btn-outline-info,
+[data-bs-theme="dark"] .btn-check:checked + .btn-outline-danger,
+[data-bs-theme="dark"] .btn-check:checked + .btn-outline-secondary {
+    color: #fff !important;
+}
+
+/* ===== Charts ===== */
+canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+
+/* ===== Responsive Table ===== */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ===== Video Players ===== */
+video {
+    width: 100%;
+    height: auto;
+    background-color: #000;
+    border-radius: 0.375rem;
+}
+
+/* ===== Loading States ===== */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* ===== Utilities ===== */
+.font-monospace {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.text-break {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+/* ===== Playlist Styles ===== */
+.playlist-container {
+    border-left: 3px solid #dee2e6;
+    padding-left: 0.5rem;
+}
+
+[data-bs-theme="dark"] .playlist-container {
+    border-left-color: #495057;
+}
+
+.playlist-items {
+    scrollbar-width: thin;
+}
+
+.playlist-item {
+    transition: background-color 0.15s ease;
+}
+
+.playlist-item.active {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-left: 3px solid #0d6efd;
+}
+
+[data-bs-theme="dark"] .playlist-item.active {
+    background-color: rgba(13, 110, 253, 0.2);
+}
+
+.playlist-item.completed {
+    opacity: 0.7;
+}
+
+.playlist-item.pending {
+    opacity: 0.6;
+}
+
+.playlist-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-bs-theme="dark"] .playlist-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.playlist-icon {
+    min-width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.playlist-filename {
+    line-height: 1.2;
+}
+
+.playlist-badge {
+    flex-shrink: 0;
+}
+
+/* ===== Custom Scrollbar ===== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-track {
+    background: #212529;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* ===== Print Styles ===== */
+@media print {
+    .sidebar,
+    .navbar,
+    .btn,
+    .modal {
+        display: none !important;
+    }
+    
+    main {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="it" data-bs-theme="auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Manager</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- HLS.js for video playback -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img id="navbar-logo" src="" alt="Logo" height="40" class="me-2 d-none">
+                <span id="server-name">Media Manager</span>
+            </a>
+            <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" 
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid" style="margin-top: 70px;">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar collapse" id="sidebarMenu">
+                <!-- Close button (mobile only) -->
+                <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close sidebar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                
+                <div class="position-sticky d-flex flex-column">
+                    <!-- Navigation Links -->
+                    <ul class="nav flex-column flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-page="dashboard">
+                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-page="tasks">
+                                <i class="bi bi-play-circle me-2"></i>Gestione Tasks
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-page="info">
+                                <i class="bi bi-info-circle me-2"></i>Info
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Server Time at bottom -->
+                    <div class="border-top pt-2 pb-3 mt-auto">
+                        <div class="text-center small text-muted">
+                            <div><i class="bi bi-clock me-1"></i>Server Time</div>
+                            <div id="sidebar-datetime" class="fw-bold">--:--:--</div>
+                            <div id="sidebar-timezone" class="small">--</div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Sidebar backdrop (mobile only) -->
+            <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-md-auto col-lg-10 px-md-4">
+                <!-- Dashboard Page -->
+                <div id="dashboard-page" class="page-content">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Dashboard</h1>
+                    </div>
+
+                    <!-- System Resources -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">CPU Usage</h6>
+                                    <div class="progress mb-2" style="height: 25px;">
+                                        <div id="cpu-progress" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">RAM Usage</h6>
+                                    <div class="progress mb-2" style="height: 25px;">
+                                        <div id="ram-progress" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">GPU Usage</h6>
+                                    <div class="progress mb-2" style="height: 25px;">
+                                        <div id="gpu-progress" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">MediaMTX</h6>
+                                    <div class="progress mb-2" style="height: 25px;">
+                                        <div id="mediamtx-status" class="progress-bar bg-secondary" role="progressbar" style="width: 100%">Checking...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Tasks -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Tasks</h6>
+                                    <div id="tasks-list" class="list-group">
+                                        <p class="text-muted">Loading tasks...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tasks Page -->
+                <div id="tasks-page" class="page-content d-none">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Gestione Tasks</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button class="btn btn-sm btn-primary me-2" id="add-task-btn">
+                                <i class="bi bi-plus-circle"></i> Nuovo Task
+                            </button>
+                            <button class="btn btn-sm btn-danger" id="delete-all-tasks-btn">
+                                <i class="bi bi-trash"></i> Elimina Tutti
+                            </button>
+                        </div>
+                    </div>
+                    <div id="tasks-container" class="row">
+                        <!-- Tasks will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Info Page (Unified: Server + Config + Logs + About) -->
+                <div id="info-page" class="page-content d-none">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Info</h1>
+                    </div>
+
+                    <!-- Tabs Navigation -->
+                    <ul class="nav nav-tabs mb-3" id="info-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="server-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#info-server-tab" type="button" role="tab">
+                                <i class="bi bi-server"></i> Server
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="config-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#info-config-tab" type="button" role="tab">
+                                <i class="bi bi-gear"></i> Configurazioni
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="logs-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#info-logs-tab" type="button" role="tab">
+                                <i class="bi bi-file-text"></i> Logs
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="about-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#info-about-tab" type="button" role="tab">
+                                <i class="bi bi-info-circle"></i> About
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="info-tabs-content">
+                        
+                        <!-- SERVER TAB -->
+                        <div class="tab-pane fade show active" id="info-server-tab" role="tabpanel">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">System Information</h6>
+                                            <div id="system-info">Loading...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Server Date & Time</h6>
+                                            <div id="server-datetime" class="h4">--</div>
+                                            <div id="server-timezone" class="text-muted">Timezone: --</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Resource Usage History</h6>
+                                            <canvas id="resource-chart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONFIG TAB -->
+                        <div class="tab-pane fade" id="info-config-tab" role="tabpanel">
+                            <div class="accordion" id="configAccordion">
+                                <!-- Application Config -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#appConfig">
+                                            Application Settings
+                                        </button>
+                                    </h2>
+                                    <div id="appConfig" class="accordion-collapse collapse show" data-bs-parent="#configAccordion">
+                                        <div class="card-body p-4">
+                                            <form id="app-config-form">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Server Name</label>
+                                                    <input type="text" class="form-control" name="serverName" value="Media Manager">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Server IP (leave empty for auto-detect)</label>
+                                                    <input type="text" class="form-control" name="serverIp" placeholder="Auto-detect">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Timezone</label>
+                                                    <input type="text" class="form-control" name="timezone" value="Europe/Rome">
+                                                </div>
+                                                
+                                                <hr>
+                                                
+                                                <h6>MediaMTX Control</h6>
+                                                <div class="btn-group w-100 mb-3">
+                                                    <button type="button" class="btn btn-success" id="mediamtx-start">
+                                                        <i class="bi bi-play-fill"></i> Start
+                                                    </button>
+                                                    <button type="button" class="btn btn-warning" id="mediamtx-restart">
+                                                        <i class="bi bi-arrow-repeat"></i> Restart
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger" id="mediamtx-stop">
+                                                        <i class="bi bi-stop-fill"></i> Stop
+                                                    </button>
+                                                </div>
+                                                
+                                                <hr>
+                                                
+                                                <h6>Backup & Restore</h6>
+                                                <div class="mb-3">
+                                                    <button type="button" class="btn btn-primary me-2" id="backup-btn">
+                                                        <i class="bi bi-download"></i> Create Backup
+                                                    </button>
+                                                    <button type="button" class="btn btn-secondary" id="restore-btn">
+                                                        <i class="bi bi-upload"></i> Restore Backup
+                                                    </button>
+                                                    <input type="file" id="restore-file" class="d-none" accept=".zip">
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Save Settings</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Dashboard Config -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dashboardConfig">
+                                            Dashboard Settings
+                                        </button>
+                                    </h2>
+                                    <div id="dashboardConfig" class="accordion-collapse collapse" data-bs-parent="#configAccordion">
+                                        <div class="card-body p-4">
+                                            <form id="dashboard-config-form">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Logo (URL or upload)</label>
+                                                    <input type="text" class="form-control mb-2" name="logoUrl" placeholder="http://example.com/logo.png">
+                                                    <input type="file" class="form-control" id="logo-upload" accept="image/*">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Theme</label>
+                                                    <select class="form-select" name="theme">
+                                                        <option value="auto">Auto</option>
+                                                        <option value="light">Light</option>
+                                                        <option value="dark">Dark</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="autoRefresh" id="autoRefresh" checked>
+                                                        <label class="form-check-label" for="autoRefresh">
+                                                            Auto-refresh
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Refresh Interval (seconds)</label>
+                                                    <input type="range" class="form-range" name="refreshInterval" min="1" max="60" value="5" id="refreshInterval">
+                                                    <div class="text-muted">Current: <span id="refreshIntervalValue">5</span>s</div>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Save Settings</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Monitoring Settings -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#monitoringConfig">
+                                            <i class="bi bi-activity me-2"></i> Monitoring Settings
+                                        </button>
+                                    </h2>
+                                    <div id="monitoringConfig" class="accordion-collapse collapse" data-bs-parent="#configAccordion">
+                                        <div class="card-body p-4">
+                                            <form id="monitoring-config-form">
+                                                <div class="mb-3">
+                                                    <label class="form-label">
+                                                        Data collection interval
+                                                        <span class="badge bg-primary ms-2" id="collectionIntervalBadge">60s</span>
+                                                    </label>
+                                                    <input type="range" class="form-range" name="collectionInterval"
+                                                           id="collectionInterval" min="1" max="60" value="60">
+                                                    <div class="d-flex justify-content-between text-muted small mt-1">
+                                                        <span>1s (real-time)</span>
+                                                        <span id="collectionIntervalValue">Current: <strong>60s</strong></span>
+                                                        <span>60s (1 min)</span>
+                                                    </div>
+                                                    <div class="alert alert-info mt-3 py-2 small mb-0">
+                                                        <i class="bi bi-info-circle me-1"></i>
+                                                        Valori bassi danno più risoluzione ma aumentano la dimensione del DB.
+                                                        A 1s → 24h ≈ 86.400 punti &nbsp;|&nbsp; A 60s → 24h ≈ 1.440 punti.
+                                                    </div>
+                                                </div>
+                                                
+                                                <hr>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">Default chart time range</label>
+                                                    <select class="form-select" name="chartTimeRange" id="chartTimeRange">
+                                                        <option value="1">Last 1 minute</option>
+                                                        <option value="60">Last 1 hour</option>
+                                                        <option value="720">Last 12 hours</option>
+                                                        <option value="1440" selected>Last 24 hours</option>
+                                                    </select>
+                                                    <div class="form-text">
+                                                        Time range shown by default in the resource usage chart.
+                                                    </div>
+                                                </div>
+                                                
+                                                <hr>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                                               id="enableConsoleLogs" name="enableConsoleLogs" checked>
+                                                        <label class="form-check-label" for="enableConsoleLogs">
+                                                            Enable console logging
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-text">
+                                                        When disabled, all console.log() calls will be silenced. Reload the page to apply.
+                                                    </div>
+                                                </div>
+                                                
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="bi bi-save me-1"></i> Save & Apply
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- LOGS TAB -->
+                        <div class="tab-pane fade" id="info-logs-tab" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="card-title mb-0">Logs</h6>
+                                        <button class="btn btn-sm btn-primary" id="logs-refresh-btn">
+                                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Log Type Filters -->
+                                    <div class="mb-3">
+                                        <div class="btn-group" role="group" aria-label="Log type filter">
+                                            <input type="radio" class="btn-check" name="logTypeFilter" id="logTypeAll" value="all" autocomplete="off" checked>
+                                            <label class="btn btn-outline-primary btn-sm" for="logTypeAll">
+                                                <i class="bi bi-list-ul"></i> All
+                                            </label>
+                                            
+                                            <input type="radio" class="btn-check" name="logTypeFilter" id="logTypeComplete" value="task_complete" autocomplete="off">
+                                            <label class="btn btn-outline-success btn-sm" for="logTypeComplete">
+                                                <i class="bi bi-check-circle"></i> Completed
+                                            </label>
+                                            
+                                            <input type="radio" class="btn-check" name="logTypeFilter" id="logTypeStart" value="task_start" autocomplete="off">
+                                            <label class="btn btn-outline-info btn-sm" for="logTypeStart">
+                                                <i class="bi bi-play-circle"></i> Started
+                                            </label>
+                                            
+                                            <input type="radio" class="btn-check" name="logTypeFilter" id="logTypeFile" value="file_complete" autocomplete="off">
+                                            <label class="btn btn-outline-secondary btn-sm" for="logTypeFile">
+                                                <i class="bi bi-file-earmark-check"></i> Files
+                                            </label>
+                                            
+                                            <input type="radio" class="btn-check" name="logTypeFilter" id="logTypeError" value="error" autocomplete="off">
+                                            <label class="btn btn-outline-danger btn-sm" for="logTypeError">
+                                                <i class="bi bi-exclamation-triangle"></i> Errors
+                                            </label>
+                                        </div>
+                                        <small class="text-muted ms-2">
+                                            <i class="bi bi-info-circle"></i> Select log type to filter
+                                        </small>
+                                    </div>
+                                    
+                                    <div id="error-logs-container">
+                                        <div class="text-center py-5">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <p class="text-muted mt-2">Loading logs...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ABOUT TAB -->
+                        <div class="tab-pane fade" id="info-about-tab" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body p-4">
+                                    <h3 class="card-title">Media-Manager v1.0.0</h3>
+                                    <p class="lead">Professional media streaming management platform</p>
+                                    
+                                    <hr>
+                                    
+                                    <h5>Features</h5>
+                                    <ul>
+                                        <li>Multi-task video streaming management</li>
+                                        <li>RTSP and HLS protocol support</li>
+                                        <li>Playlist creation with multiple videos</li>
+                                        <li>Scheduled streaming with cron jobs</li>
+                                        <li>Real-time system monitoring (CPU, RAM, GPU)</li>
+                                        <li>Live HLS preview in web interface</li>
+                                        <li>File browser for USB drives and SMB shares</li>
+                                        <li>Backup and restore configuration</li>
+                                        <li>Responsive dark/light theme interface</li>
+                                        <li>Error logging and monitoring</li>
+                                    </ul>
+
+                                    <hr>
+
+                                    <h5>Technology Stack</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6>Backend</h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="bi bi-check-circle text-success"></i> Node.js 24</li>
+                                                <li><i class="bi bi-check-circle text-success"></i> Express.js 4.18</li>
+                                                <li><i class="bi bi-check-circle text-success"></i> FFmpeg 7.x</li>
+                                                <li><i class="bi bi-check-circle text-success"></i> MediaMTX Latest</li>
+                                                <li><i class="bi bi-check-circle text-success"></i> Docker & Alpine Linux</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Frontend</h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="bi bi-check-circle text-success"></i> Bootstrap 5.3.3</li>
+                                                <li><i class="bi bi-check-circle text-success"></i> Vanilla JavaScript ES6+</li>
+                                                <li><i class="bi bi-check-circle text-success"></i> Chart.js 4.4</li>
+                                                <li><i class="bi bi-check-circle text-success"></i> HLS.js</li>
+                                                <li><i class="bi bi-check-circle text-success"></i> Bootstrap Icons</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    <h5>Streaming Protocols</h5>
+                                    <ul class="list-unstyled">
+                                        <li><strong>RTSP:</strong> Real-Time Streaming Protocol (Port 554)</li>
+                                        <li><strong>HLS:</strong> HTTP Live Streaming (Port 8888)</li>
+                                        <li><strong>WebRTC:</strong> Web Real-Time Communication (Port 8889)</li>
+                                    </ul>
+
+                                    <hr>
+
+                                    <h5>Created By</h5>
+                                    <p class="mb-0">
+                                        <strong>Media-Manager</strong> was created with the assistance of <strong>Claude</strong> (Anthropic AI)
+                                        in collaboration with the development team.
+                                    </p>
+                                    <p class="text-muted small mt-2">
+                                        Designed and developed in January 2026
+                                    </p>
+
+                                    <hr>
+
+                                    <div class="text-center">
+                                        <p class="text-muted mb-0">
+                                            <small>
+                                                Licensed under MIT License<br>
+                                                © 2026 Media-Manager Project
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal fade" id="taskModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskModalLabel">New Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="task-form">
+                        <input type="hidden" name="taskId" id="task-id">
+                        <div class="mb-3">
+                            <label class="form-label">Task Name</label>
+                            <input type="text" class="form-control" name="name" id="task-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Files/Playlist</label>
+                            <div class="btn-group mb-2 w-100">
+                                <button type="button" class="btn btn-sm btn-secondary" id="browse-files-btn">
+                                    <i class="bi bi-folder"></i> Browse Local Files (/mnt)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-info" id="browse-smb-btn">
+                                    <i class="bi bi-hdd-network"></i> Browse Network (SMB)
+                                </button>
+                            </div>
+                            <textarea class="form-control" name="files" id="task-files" rows="4" placeholder="/mnt/usb/video.mp4&#10;//smb-server/share/video2.mp4" required></textarea>
+                            <small class="form-text text-muted">One file per line. Use //server/share/file for SMB paths</small>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Start Date & Time (Optional)</label>
+                                <input type="datetime-local" class="form-control" name="startDateTime" id="task-start-datetime">
+                                <small class="form-text text-muted">Leave empty to start manually</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Seek Time (HH:mm:ss)</label>
+                                <input type="text" class="form-control" name="seekTime" id="task-seek-time" value="00:00:00" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}">
+                                <small class="form-text text-muted">Start position in video</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="loop" id="task-loop">
+                                <label class="form-check-label" for="task-loop">
+                                    Loop
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-task-btn">Save Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Browser Modal -->
+    <div class="modal fade" id="fileBrowserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Browse Files</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Current Path: <span id="current-path">/mnt</span></label>
+                    </div>
+                    <div class="list-group" id="file-list" style="max-height: 400px; overflow-y: auto;">
+                        <!-- Files will be loaded here -->
+                    </div>
+                    <div class="mt-3">
+                        <h6>Selected Files:</h6>
+                        <div id="selected-files" class="border rounded p-2" style="min-height: 60px; max-height: 150px; overflow-y: auto;">
+                            <small class="text-muted">No files selected</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirm-files-btn">Confirm Selection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom Scripts - ORDINE IMPORTANTE! -->
+    <script src="/js/theme.js"></script>
+    
+    <script src="/js/dashboard.js"></script>
+    <script src="/js/tasks.js"></script>
+    <script src="/js/info.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

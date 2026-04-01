@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  media-manager:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: media-manager
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - /mnt:/mnt:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - NODE_ENV=production
+      - TZ=Europe/Rome
+    networks:
+      - media-network
+    depends_on:
+      - mediamtx
+
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: mediamtx
+    restart: unless-stopped
+    ports:
+      - "554:554"      # RTSP
+      - "8888:8888"    # HLS
+      - "8889:8889"    # WebRTC
+      - "9996:9996"    # Playback
+      - "9997:9997"    # API
+    volumes:
+      - ./data/mediamtx:/recordings
+      - ./data/mediamtx.yml:/mediamtx.yml:ro
+    environment:
+      - MTX_PROTOCOLS=tcp
+      - MTX_RTSPADDRESS=:554
+      - MTX_HLSADDRESS=:8888
+      - MTX_WEBRTCADDRESS=:8889
+      - MTX_APIADDRESS=:9997
+      - MTX_PLAYBACKADDRESS=:9996
+    networks:
+      - media-network
+    command: /mediamtx.yml
+
+networks:
+  media-network:
+    driver: bridge
